@@ -3,19 +3,18 @@
 Installation:
 -------------
 
-Compile:
+Install required python lib.
 
-    $ make
+    # apt-get install libpam-python python-pam cryptsetup
 
 Copy the module with the others PAM.
 
-    $ sudo cp pamela.so /lib/x86_64-linux-gnu/security/
+    # cp pamela.py /lib/security/
 
 Then modify the configuration files to add the module in the sessions.
 
-     $ sudo emacs /etc/pam.d/common-session
+    # emacs /etc/pam.d/common-session
 
 Add the following line at the end of the file :
 
-    session required pamela.so
-
+    session required  pam_python.so pamela.py
