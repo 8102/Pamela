@@ -34,7 +34,8 @@ $(OBJ_DIR)%.o	:	$(patsubst %.c, ${SRC_DIR}%.c, %.c)
 $(NAME)		:	$(OBJS)
 			$(CC) $(OBJS) -o $(NAME) $(LDFLAGS)
 
-all		:	$(NAME)
+all		:
+			@$(MAKE) --no-print-directory $(NAME)
 
 clean		:
 			$(RM) $(OBJS) $(OBJ_DIR)
