@@ -14,7 +14,7 @@ SRC_DIR		=	src/
 #                        FLAGS                          #
 #########################################################
 
-CFLAGS		=	-Wall -Wextra -fPIC
+CFLAGS		=	-W -Wall -Wextra -fPIC
 
 LDFLAGS		=	-lpam -lpam_misc -shared
 
