@@ -1,0 +1,14 @@
+#!/usr/bin/python2.7
+
+from __future__ import print_function
+import shutil
+
+def warning(*args):
+	print("WARNING: ", *args, file=sys.stderr)
+
+try:
+	shutil.copyfile('pamela.py', '/lib/security/pamela.py')
+	with open('/etc/pam.d/common-session', 'a+') as file:
+		file.write('session required  pam_python.so pamela.py')	
+except IOError as e:
+	print(e)
