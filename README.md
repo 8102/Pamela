@@ -3,7 +3,7 @@
 Installation:
 -------------
 
-Install required python lib.
+Install required python lib and necessary program
 
     # apt-get install libpam-python python-pam cryptsetup
 
