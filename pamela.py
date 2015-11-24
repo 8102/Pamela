@@ -4,7 +4,7 @@ from os.path import isfile
 import subprocess
 
 config = {}
-import time
+
 #
 #   Function that load the configuration file
 #
@@ -63,9 +63,6 @@ def    createBackup(pamh, config):
         if ret != 0:
             eraseBackup(pamh, config, "Failed to create volume")
             return False
-#    cmd = "losetup -f"
-#    ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-#    cmd = "losetup /dev/loop0 " + config['backup_path'] + config['backup_name']
     cmd = "losetup /dev/loop0 /home/" + pamh.user + "/.local/" + config['backup_name']
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if ret != 0:
