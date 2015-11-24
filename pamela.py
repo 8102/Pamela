@@ -4,7 +4,7 @@ from os.path import isfile
 import subprocess
 
 config = {}
-
+import time
 #
 #   Function that load the configuration file
 #
@@ -13,7 +13,9 @@ def    loadConfig(pamh):
     config = {
                 'container_name': "myContainer",
                 'container_path': "/home/" + pamh.user,
+                'backup': True,
                 'backup_name': "backup",
+                'backup_path': "/home/" + pamh.user + "/.local/",
                 'volume_size': 100,
                 'format': "ext4",
                 'encryption_level': "medium"
@@ -32,6 +34,8 @@ def    loadConfig(pamh):
                     config['container_level'] = tokens[1]
                 elif tokens[0] == 'backup_name':
                     config['backup_name'] = tokens[1]
+                elif tokens[0] == 'backup_path':
+                    config['backup_path'] = tokens[1]
                 elif tokens[0] == 'volume_size':
                     config['volume_size'] = tokens[1]
                 elif tokens[0] == 'encryption_level':
@@ -45,22 +49,28 @@ def    loadConfig(pamh):
 #   when there is an error
 #
 def    eraseBackup(pamh, config, errorMsg):
-    cmd = "rm -fr /home/" + pamh.user + "/.local/" + config['backup_name']
+    cmd = "rm -fr " + config['backup_path'] + config['backup_name']
     ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     print "Error: pamela.py: " + errorMsg
 
 def    createBackup(pamh, config):
-    cmd = "dd if=/dev/zero of=/home/" + pamh.user + "/.local/" + config['backup_name']
-    cmd += " bs=" + str(config['volume_size']) + "M count=1"
+    cmd = "ls " + config['backup_path'] + config['backup_name']
     ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if ret != 0:
-        eraseBackup(pamh, config, "Failed to create volume")
-        return ret
+    if ret == 2:
+        cmd = "dd if=/dev/zero of=" + config['backup_path'] + config['backup_name']
+        cmd += " bs=" + str(config['volume_size']) + "M count=1"
+        ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        if ret != 0:
+            eraseBackup(pamh, config, "Failed to create volume")
+            return False
+#    cmd = "losetup -f"
+#    ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+#    cmd = "losetup /dev/loop0 " + config['backup_path'] + config['backup_name']
     cmd = "losetup /dev/loop0 /home/" + pamh.user + "/.local/" + config['backup_name']
-    ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if ret != 0:
         eraseBackup(pamh, config, "Failed to create loopback device")
-        return ret
+        return False
     return True
 
 #
@@ -117,8 +127,9 @@ def    closeContainer(pamh, config):
     ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     cmd = "cryptsetup luksClose " + config['container_name']
     ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    cmd = "rm -fr /home/" + pamh.user + "/.local/" + config['backup_name']
-    ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    if config['backup'] != True:
+        cmd = "rm -fr " + config['backup_path'] + config['backup_name']
+        ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     cmd = "rm -fr /home/" + pamh.user + config['backup_name']
     ret = subprocess.call(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     cmd = "losetup -d /dev/loop0"
